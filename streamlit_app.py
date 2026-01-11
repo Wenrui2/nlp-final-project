@@ -198,7 +198,7 @@ with tab2:
                         st.markdown(result)
 
 # === 功能模块 3: 文档知识库 (RAG 核心功能) ===
-with tab4:
+with tab3:
     st.header("📚 文档问答 (RAG)")
     st.caption("上传 PDF/TXT 文档，让 AI 基于文档内容回答问题（支持长文档分析）")
     
@@ -252,7 +252,7 @@ with tab4:
         st.info("👆 请先上传一个文档开始体验")
 
 # === 功能模块 3: 系统说明 (文档凑数) ===
-with tab3:
+with tab4:
     st.markdown("### 系统架构说明")
     st.markdown("""
     本系统采用 **MVC (Model-View-Controller)** 架构设计：
