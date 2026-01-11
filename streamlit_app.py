@@ -11,16 +11,14 @@ st.markdown("没有Key? [点击这里注册获取](https://platform.deepseek.com
 openai_api_key = st.sidebar.text_input('API Key', type='password')
 
 def generate_response(input_text):
-    # --- 关键修改开始 ---
     llm = ChatOpenAI(
         temperature=0.7, 
-        openai_api_key=openai_api_key,
-        # 1. 这里填 DeepSeek 的地址
-        base_url="https://api.deepseek.com", 
-        # 2. 这里填 DeepSeek 的模型名称
-        model_name="deepseek-chat"           
+        openai_api_key=openai_api_key, 
+        # 修改1：硅基流动的地址
+        base_url="https://api.siliconflow.cn/v1", 
+        # 修改2：硅基流动的免费模型名称 (DeepSeek-V3)
+        model_name="deepseek-ai/DeepSeek-V3"           
     )
-    # --- 关键修改结束 ---
   
     # 显示加载状态
     with st.spinner('AI 正在思考中...'):
