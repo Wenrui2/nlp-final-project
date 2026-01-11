@@ -1,6 +1,5 @@
 streamlit
+openai
 langchain
 langchain-community
 langchain-core
-openai
-tiktoken
