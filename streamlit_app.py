@@ -111,7 +111,7 @@ def extract_text_from_file(uploaded_file):
         return None
 
 # --- 4. 主界面布局 (系统设计：视图层) ---
-st.title('🧠 NLP 期末大作业 - 智能多模态分析系统')
+st.title('🧠 智能多模态分析系统')
 st.caption("基于 DeepSeek-V3 大语言模型的综合处理平台")
 
 # 使用 Tabs 分割功能模块 (丰富功能点，凑代码量)
