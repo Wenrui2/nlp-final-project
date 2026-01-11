@@ -1,12 +1,12 @@
 import streamlit as st
 import json
 import time
-import PyPDF2  # 新增：用于解析PDF
-import io      # 新增：用于处理字节流
+import PyPDF2  
+import io      
 from langchain_community.chat_models import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 
-# --- 1. 系统配置与全局设置 (系统设计：前端层) ---
+# 系统配置与全局设置
 st.set_page_config(
     page_title="DeepSeek NLP 智能分析系统",
     page_icon="🧠",
@@ -14,28 +14,28 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 初始化 Session State (关键技术点：状态管理)
+# 初始化 Session State
 # 用于存储聊天记录，实现多轮对话
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "processing" not in st.session_state:
     st.session_state.processing = False
 
-# --- 2. 侧边栏配置区 (系统设计：控制层) ---
+# 侧边栏配置区
 with st.sidebar:
     st.title("🛠️ 系统控制台")
     st.markdown("---")
     
-    # 2.1 API 配置
+    # API 配置
     st.subheader("1. 接口设置")
     openai_api_key = st.text_input('API Key (密钥)', type='password', help="请输入 SiliconFlow/DeepSeek 的 API Key")
     
-    # 2.2 模型参数 (体现对NLP参数的理解 - 详细设计点)
+    # 模型参数 (体现对NLP参数的理解 - 详细设计点)
     st.subheader("2. 模型参数")
     temperature = st.slider("创新度 (Temperature)", 0.0, 1.5, 0.7, 0.1, help="值越高回复越发散，值越低越严谨")
     max_tokens = st.number_input("最大长度 (Max Tokens)", 512, 4096, 2048)
     
-    # 2.3 角色设定 (创新点：Prompt Engineering)
+    # 角色设定
     st.subheader("3. 角色设定")
     system_role = st.selectbox(
         "选择 AI 扮演的角色",
@@ -43,13 +43,13 @@ with st.sidebar:
         index=0
     )
     
-    # 2.4 数据管理
+    # 数据管理
     st.markdown("---")
     if st.button("🗑️ 清空对话历史"):
         st.session_state.messages = []
         st.rerun()
         
-    # 导出功能 (加分项：功能完整性)
+    # 导出功能
     if st.session_state.messages:
         chat_str = json.dumps([{"role": m["role"], "content": m["content"]} for m in st.session_state.messages], ensure_ascii=False, indent=2)
         st.download_button(
@@ -59,7 +59,7 @@ with st.sidebar:
             mime="application/json"
         )
 
-# --- 3. 核心逻辑函数 (系统设计：逻辑层) ---
+# 逻辑函数
 
 def get_system_prompt(role):
     """根据选择的角色返回 System Prompt"""
@@ -80,8 +80,8 @@ def call_llm(messages_payload):
     llm = ChatOpenAI(
         temperature=temperature,
         openai_api_key=openai_api_key,
-        base_url="https://api.siliconflow.cn/v1", # 硅基流动地址
-        model_name="deepseek-ai/DeepSeek-V3",     # 模型名称
+        base_url="https://api.siliconflow.cn/v1", 
+        model_name="deepseek-ai/DeepSeek-V3",     
         max_tokens=max_tokens
     )
     
@@ -92,7 +92,7 @@ def call_llm(messages_payload):
         st.error(f"❌ API 调用失败: {str(e)}")
         return None
         
-# --- 3.1 新增：文档处理函数 (NLP 非结构化数据处理) ---
+# 文档处理函数
 def extract_text_from_file(uploaded_file):
     """从上传的文件中提取文本内容"""
     content = ""
@@ -110,31 +110,30 @@ def extract_text_from_file(uploaded_file):
         st.error(f"解析文件失败: {e}")
         return None
 
-# --- 4. 主界面布局 (系统设计：视图层) ---
+# 主界面布局
 st.title('🧠 智能多模态分析系统')
 st.caption("基于 DeepSeek-V3 大语言模型的综合处理平台")
 
 # 使用 Tabs 分割功能模块 (丰富功能点，凑代码量)
 tab1, tab2, tab3, tab4 = st.tabs(["💬 智能对话", "📝 文本分析工具箱", "📚 文档知识库 (RAG)", "ℹ️ 关于系统"])
 
-# === 功能模块 1: 智能对话 (多轮交互) ===
+# 智能对话
 with tab1:
-    # 4.1 显示历史消息
+    # 显示历史消息
     for msg in st.session_state.messages:
         avatar = "🧑‍💻" if msg["role"] == "user" else "🤖"
         with st.chat_message(msg["role"], avatar=avatar):
             st.markdown(msg["content"])
             
-    # 4.2 处理用户输入
+    # 处理用户输入
     if prompt := st.chat_input("请输入您的问题..."):
         # 用户消息上屏
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user", avatar="🧑‍💻"):
             st.markdown(prompt)
             
-        # 构建消息上下文 (包含 System Prompt + History)
+        # 构建消息上下文
         langchain_msgs = [SystemMessage(content=get_system_prompt(system_role))]
-        # 只取最近 10 条历史，防止 token 超出
         for m in st.session_state.messages[-10:]:
             if m["role"] == "user":
                 langchain_msgs.append(HumanMessage(content=m["content"]))
@@ -148,7 +147,6 @@ with tab1:
                 response_text = call_llm(langchain_msgs)
                 
             if response_text:
-                # 模拟打字机效果 (视觉优化)
                 full_response = ""
                 for chunk in response_text.split():
                     full_response += chunk + " "
@@ -156,10 +154,9 @@ with tab1:
                     message_placeholder.markdown(full_response + "▌")
                 message_placeholder.markdown(full_response)
                 
-                # 存入历史
                 st.session_state.messages.append({"role": "assistant", "content": full_response})
 
-# === 功能模块 2: 文本分析工具箱 (创新点：特定任务处理) ===
+# 文本分析工具箱
 with tab2:
     st.header("NLP 特定任务处理")
     st.info("此模块不依赖上下文，用于处理单段文本任务。")
@@ -197,12 +194,12 @@ with tab2:
                         st.markdown("### 分析结果")
                         st.markdown(result)
 
-# === 功能模块 3: 文档知识库 (RAG 核心功能) ===
+# 文档知识库 (RAG 核心功能)
 with tab3:
     st.header("📚 文档问答 (RAG)")
     st.caption("上传 PDF/TXT 文档，让 AI 基于文档内容回答问题（支持长文档分析）")
     
-    # 1. 文件上传区
+    # 文件上传区
     uploaded_file = st.file_uploader("上传文档 (支持 PDF/TXT)", type=["pdf", "txt"])
     
     if uploaded_file:
@@ -210,7 +207,7 @@ with tab3:
         file_details = {"文件名": uploaded_file.name, "文件大小": f"{uploaded_file.size / 1024:.2f} KB"}
         st.success(f"文件上传成功: {uploaded_file.name}")
         
-        # 2. 文档解析 (数据预处理)
+        # 文档解析 (数据预处理)
         if "doc_content" not in st.session_state or st.session_state.current_file != uploaded_file.name:
             with st.spinner("正在解析文档内容..."):
                 doc_text = extract_text_from_file(uploaded_file)
@@ -221,7 +218,7 @@ with tab3:
                 else:
                     st.stop()
         
-        # 3. 文档问答交互
+        # 文档问答交互
         st.markdown("---")
         rag_question = st.text_input("关于这篇文档，你想问什么？", placeholder="例如：这篇文章的主要观点是什么？")
         
@@ -231,7 +228,7 @@ with tab3:
             elif not openai_api_key:
                 st.warning("请配置 API Key！")
             else:
-                # 4. 构建 RAG Prompt (关键技术：Context Injection)
+                # 构建 RAG Prompt
                 # 将文档内容注入到 Prompt 中，利用 DeepSeek 的长窗口能力
                 rag_prompt = [
                     SystemMessage(content="你是一个专业的文档分析助手。请仅根据用户提供的下文背景信息回答问题。如果背景信息中没有答案，请直接说不知道，不要编造。"),
@@ -244,14 +241,12 @@ with tab3:
                         st.markdown("### 🤖 回答结果")
                         st.markdown(answer)
                         
-                        # 创新点：展示引用来源（模拟）
                         with st.expander("查看参考上下文"):
-                            # 简单展示文档前500字作为示意
                             st.text(st.session_state.doc_content[:1000] + "...")
     else:
         st.info("👆 请先上传一个文档开始体验")
 
-# === 功能模块 3: 系统说明 (文档凑数) ===
+# 系统说明 
 with tab4:
     st.markdown("### 系统架构说明")
     st.markdown("""
