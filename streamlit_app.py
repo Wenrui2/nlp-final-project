@@ -1,37 +1,44 @@
 import streamlit as st
-# 修改点1: 这里的导入路径变了，这是导致你报错的根本原因
 from langchain_community.chat_models import ChatOpenAI
-# 修改点2: 使用 langchain_core 来导入消息对象，这是新版标准
 from langchain_core.messages import HumanMessage
 
-st.set_page_config(page_title="🦜🔗 Quickstart App")
-st.title('🦜🔗 Quickstart App')
+st.set_page_config(page_title="NLP期末大作业-智能助手")
+st.title('🤖 NLP期末大作业 - 智能问答系统')
 
-openai_api_key = st.sidebar.text_input('OpenAI API Key', type='password')
+# 提示用户输入 Key
+st.markdown("### 请输入 DeepSeek API Key")
+st.markdown("没有Key? [点击这里注册获取](https://platform.deepseek.com/) (新用户免费送额度)")
+openai_api_key = st.sidebar.text_input('API Key', type='password')
 
 def generate_response(input_text):
-    # 实例化模型
+    # --- 关键修改开始 ---
     llm = ChatOpenAI(
         temperature=0.7, 
         openai_api_key=openai_api_key,
-        model_name="gpt-3.5-turbo" 
+        # 1. 这里填 DeepSeek 的地址
+        base_url="https://api.deepseek.com", 
+        # 2. 这里填 DeepSeek 的模型名称
+        model_name="deepseek-chat"           
     )
+    # --- 关键修改结束 ---
   
-    # 调用 invoke
-    response = llm.invoke(input_text)
-  
-    # 显示结果
-    st.info(response.content)
+    # 显示加载状态
+    with st.spinner('AI 正在思考中...'):
+        response = llm.invoke(input_text)
+        st.info(response.content)
 
 with st.form('my_form'):
-    text = st.text_area('Enter text:', 'What are the three key pieces of advice for learning how to code?')
-    submitted = st.form_submit_button('Submit')
+    text = st.text_area('请输入问题:', '自然语言处理中 BERT 模型的核心原理是什么？')
+    submitted = st.form_submit_button('提交运行')
   
-    if not openai_api_key.startswith('sk-'):
-        st.warning('Please enter your OpenAI API key!', icon='⚠')
+    if not openai_api_key:
+        st.warning('请先在左侧输入 API Key!', icon='⚠')
   
-    if submitted and openai_api_key.startswith('sk-'):
+    if submitted and openai_api_key:
         try:
             generate_response(text)
         except Exception as e:
             st.error(f"发生错误: {e}")
+            st.markdown("##### 常见错误排查：")
+            st.markdown("1. 确保你用的是 **DeepSeek** 的 Key，而不是 OpenAI 的。")
+            st.markdown("2. 确保 Key 没有多复制空格。")
