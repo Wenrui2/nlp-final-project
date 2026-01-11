@@ -264,4 +264,5 @@ with tab4:
     1. **Context Management**: 使用 `Session State` 管理多轮对话上下文。
     2. **Prompt Engineering**: 针对不同角色（学术专家、代码审计员）设计了差异化的 System Prompts。
     3. **Error Handling**: 完整的异常捕获机制，确保 API 故障时系统不崩溃。
+    4. **RAG Document Q&A**：允许用户上传 PDF/TXT，让 AI 基于文档回答。
     """)
