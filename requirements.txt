@@ -3,4 +3,4 @@ openai
 langchain
 langchain-community
 langchain-core
-pypdf
+PyPDF2
